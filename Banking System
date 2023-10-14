@@ -1,0 +1,105 @@
+class Bank:
+    def __init__(self):
+        self.accounts = {}
+
+    def add_account(self, acc_number, acc_holder):
+        self.accounts[acc_number] = {
+            "holder": acc_holder,
+            "balance": 0.0
+        }
+
+    def deposit(self, acc_number, amt):
+        if acc_number in self.accounts and amt > 0:
+            self.accounts[acc_number]["balance"] += amt
+
+    def withdraw(self, acc_number, amt):
+        if acc_number in self.accounts and amt > 0 and self.accounts[acc_number]["balance"] >= amt:
+            self.accounts[acc_number]["balance"] -= amt
+
+    def get_balance(self, acc_number):
+        return self.accounts.get(acc_number, {}).get("balance", 0.0)
+
+    def save_accounts(self, filename):
+        with open(filename, 'w') as file:
+            for acc_number, data in self.accounts.items():
+                file.write(f"{acc_number},{data['holder']},{data['balance']}\n")
+
+    def load_accounts(self, filename):
+        try:
+            with open(filename, 'r') as file:
+                lines = file.readlines()
+                for line in lines:
+                    acc_number, holder, balance = line.strip().split(',')
+                    self.accounts[acc_number] = {
+                        "holder": holder,
+                        "balance": float(balance)
+                    }
+        except FileNotFoundError:
+            pass
+
+if __name__ == "__main__":
+    bank = Bank()
+    bank.load_accounts("accounts.txt")
+
+    while True:
+        print("\nOptions:")
+        print("1. Add a new account")
+        print("2. Deposit money")
+        print("3. Withdraw money")
+        print("4. Get balance")
+        print("5. Save accounts")
+        print("6. Exit")
+
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            acc_number = input("Enter account number: ")
+            acc_holder = input("Enter account holder name: ")
+            bank.add_account(acc_number, acc_holder)
+            print(f"Account '{acc_number}' added successfully.")
+            save_choice = input("Enter 'save' to save changes, or press Enter to continue: ")
+            if save_choice.lower() == "save":
+                bank.save_accounts("accounts.txt")
+                print("Accounts saved successfully.")
+            else:
+                print("Changes not saved.")
+
+        elif choice == "2":
+            acc_number = input("Enter account number: ")
+            amt = float(input("Enter the amount to deposit: "))
+            bank.deposit(acc_number, amt)
+            print("Deposit successful.")
+            save_choice = input("Enter 'save' to save changes, or press Enter to continue: ")
+            if save_choice.lower() == "save":
+                bank.save_accounts("accounts.txt")
+                print("Accounts saved successfully.")
+            else:
+                print("Changes not saved.")
+
+        elif choice == "3":
+            acc_number = input("Enter account number: ")
+            amt = float(input("Enter the amount to withdraw: "))
+            bank.withdraw(acc_number, amt)
+            print("Withdrawal successful.")
+            save_choice = input("Enter 'save' to save changes, or press Enter to continue: ")
+            if save_choice.lower() == "save":
+                bank.save_accounts("accounts.txt")
+                print("Accounts saved successfully.")
+            else:
+                print("Changes not saved.")
+
+        elif choice == "4":
+            acc_number = input("Enter account number: ")
+            balance = bank.get_balance(acc_number)
+            print(f"Account balance: {balance}")
+
+        elif choice == "5":
+            bank.save_accounts("accounts.txt")
+            print("Accounts saved successfully.")
+
+        elif choice == "6":
+            print("Exiting...")
+            break
+
+        else:
+            print("Invalid choice. Please try again.")
